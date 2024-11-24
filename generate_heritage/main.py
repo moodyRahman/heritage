@@ -1,4 +1,6 @@
 from collections import defaultdict
+from itertools import *
+
 
 f = open("fellows.csv", "r").readlines()
 fellows = []
@@ -25,56 +27,34 @@ raw_mentor = {
 mentor = defaultdict(lambda: [])
 
 
-def find_fellow(fname, lname):
+def find_fellow(person):
+    fname = person.split(" ", 1)[0]
+    lname = person.split(" ", 1)[1]
     if len([x for x in fellows if x[0] == fname and x[1] == lname]):
         return [x
-                for x in fellows if x[0] == fname and x[1] == lname]
+                for x in fellows if x[0] == fname and x[1] == lname][0]
 
     # then check if 
     elif len([x[2] for x in fellows if x[1] == lname]):
-        return [x for x in fellows if x[1] == lname]
+        return [x for x in fellows if x[1] == lname][0]
 
     elif len([x[2] for x in fellows if fname in x[3] and lname in x[3]]):
-        return [x for x in fellows if fname in x[3] and lname in x[3]]
+        return [x for x in fellows if fname in x[3] and lname in x[3]][0]
     
     elif len([x[2] for x in fellows if fname in x[3] or lname in x[3]]):
-        return [x for x in fellows if fname in x[3] or lname in x[3]]
+        return [x for x in fellows if fname in x[3] or lname in x[3]][0]
     else:
         print("no match:", person)
     pass
 
-print(find_fellow("Moody", "Rahman"))
+# print(find_fellow("Moody", "Rahman"))
 
 # print(fellows)
 for mentor_year, mentor_arr in raw_mentor.items():
     # print("====", mentor_year)
     for person in mentor_arr:
-        fname = person.split(" ", 1)[0]
-        lname = person.split(" ", 1)[1]
-        year = -1
-
-        # shenanigans to handle how names be
-        # first check for exact match in first name and last name
-        if len([x for x in fellows if x[0] == fname and x[1] == lname]):
-            year = [x[2]
-                    for x in fellows if x[0] == fname and x[1] == lname][0]
-            # print("match:", person, year)
-            mentor[mentor_year].append((person, year))
-
-        # then check if 
-        elif len([x[2] for x in fellows if x[1] == lname]):
-            year = [x[2] for x in fellows if x[1] == lname][0]
-            # print("match:", person, year)
-            mentor[mentor_year].append((person, year))
-
-        elif len([x[2] for x in fellows if fname in x[3] and lname in x[3]]):
-            year = [x[2] for x in fellows if fname in x[3] and lname in x[3]][0]
-            # print("match:", person, year)
-            mentor[mentor_year].append((person, year))
-
-            pass
-        else:
-            print("no match:", person)
+        year = find_fellow(person)[2]
+        mentor[mentor_year].append((person, year))
 
 
 
@@ -86,12 +66,17 @@ for mentor_year, mentor_arr in raw_mentor.items():
 
 def calculate_lineage(name, depth=1):
     while depth != 0:
-
-        # return [*calculate_lineage()]
+        mentors = mentor[find_fellow(name)[2]]
+        
+        return [
+            mentor[find_fellow(name)[2]], 
+            *chain(
+                *[calculate_lineage(x[0], depth=depth-1) for x in mentors]
+            )]
         pass
     # [print(v) for k, v in mentor.items()]
-
+    return []
     pass
 
 
-calculate_lineage("Moody Rahman")
+[print(x, "\n") for x in calculate_lineage("Moody Rahman", depth=1)]
