@@ -2,7 +2,7 @@ from collections import defaultdict
 from itertools import *
 
 
-f = open("fellows.csv", "r").readlines()
+f = open("generator/fellows.csv", "r").readlines()
 fellows = []
 for x in f:
     arr = x[:-1].split(",")
@@ -67,9 +67,8 @@ for mentor_year, mentor_arr in raw_mentor.items():
 def calculate_lineage(name, depth=1):
     while depth != 0:
         mentors = mentor[find_fellow(name)[2]]
-        
         return [
-            mentor[find_fellow(name)[2]], 
+            mentors,
             *chain(
                 *[calculate_lineage(x[0], depth=depth-1) for x in mentors]
             )]
@@ -78,5 +77,3 @@ def calculate_lineage(name, depth=1):
     return []
     pass
 
-
-[print(x, "\n") for x in calculate_lineage("Moody Rahman", depth=1)]

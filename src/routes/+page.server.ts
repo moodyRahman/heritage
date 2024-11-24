@@ -1,5 +1,5 @@
 export async function load() {
-	const post = 'lala';
+	const post = {};
 
 	if (post) {
 		return post;
